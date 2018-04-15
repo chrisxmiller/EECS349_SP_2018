@@ -2,6 +2,9 @@ import math
 from parse import parse
 import ID3
 
+from node import Node
+
+
 #Christopher Miller
 #Northwestern Univ 
 #Winter 2018
@@ -122,4 +125,4 @@ trainingData = parse('house_votes_84.data')
 
 a = ID3.ID3(data2,1)
 
-print a.default
+print a.children[0].children

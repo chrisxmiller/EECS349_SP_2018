@@ -93,7 +93,7 @@ def ID3(examples, default):
   Any missing attributes are denoted with a value of "?"
   '''
   best = findBestAttribute(examples)
-  t = Node
+  t = Node()
 
   if len(examples) == 0:
     return default
@@ -112,7 +112,7 @@ def ID3(examples, default):
       #split examples for the different values of best
       newExamples = [example for example in examples if example[best] == value]
       subtree = ID3(newExamples,mode(newExamples, 'Class'))
-      #t.children.append(subtree)
+      t.children.append(subtree)
       t.parentchar.append(value)
     return t
 
