@@ -85,8 +85,11 @@ def entropy(ds, att):
   #Calculate entropy and returns
   ent = 0
   for i in range(0,num):
-  	p = float(counts[i])/float(total)
-  	ent += - p*math.log(p,num)
+  	if total == 0:
+  		ent = 1
+  	else:
+  		p = float(counts[i])/float(total)
+  		ent += - p*math.log(p,num)
   return ent
 
   
@@ -119,5 +122,5 @@ data =  [dict(a=1, b=0,   c='?', Class='a'),
 
 #Parse the voting training data
 trainingData = parse('house_votes_84.data')
-findBestAttribute(data2)
+findBestAttribute(trainingData)
 
