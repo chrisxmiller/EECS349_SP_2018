@@ -1,33 +1,40 @@
 from node import Node
-import numpy as np
+import math
 
-def ID3(examples, default):
+def entropy(ds, att):
   '''
-  Takes in an array of examples, and returns a tree (an instance of Node) 
-  trained on the examples.  Each example is a dictionary of attribute:value pairs,
-  and the target class variable is a special attribute with the name "Class".
-  Any missing attributes are denoted with a value of "?"
-  '''
-  if len(examples) == 0:
-    return node(default)
-  elif sameClass(examples):
-    return node(mode(examples))
-  else:
-    best = bestAttribute(examples)
-    #Find different values in for attribute best
-    values = list(set(list([example[best] for example in examples])))
-    t = node() with root best
-    for value in values:
-      #split examples for the different values of best
-      newExamples = splitExamples = [example for example in examples if example[attribute] == value]
-      subtree = ID3(newExamples,mode(newExamples))
-      t = add branch subtree with label value to t
-  return t
+  Calculates the entropy for an array of examples, ds, in dictionary form with the
+  defining attribute, att. att is a string. 
 
-#Returns the mode classification from the examples
-def mode(examples):
+  Values unknown, denoted at "?" are tallied and the entropy calculation 
+  removes data points with "?" from the set (e.g. total = 5, two ?'s causes total = 3)
+
+  '''
+  #List of all possible characteristics
+  labels = list(set(list([example['Class'] for example in ds])))
+  #Counts of each type of characteristic
+  num = len(labels)
+  counts = [0]*num
+  #Count number of known attributes, and number of each characteristic
+  total = 0;
+  for ex in ds:
+    if ex[att] != '?':
+      total += 1
+      for label in labels:
+        if ex['Class'] == label:
+          counts[labels.index(label)] +=1
+
+ 
+  #Calculate entropy and returns
+  ent = 0
+  for i in range(0,num-1):
+    p = float(counts[1])/float(total)
+    ent += - p*math.log(p,num)
+  return ent
+
+def mode(examples, att):
   #Get list of all classification for the examples
-  values = list([example['Class'] for example in examples])
+  values = list([example[att] for example in examples])
   #Get the list of possible classification
   labels = list(set(values))
   #Find number of instances of each label
@@ -51,7 +58,7 @@ def sameClass(examples):
 def findBestAttribute(examples):
   attributes = examples[0].keys()
   attributes.remove('Class')
-  bestAttribute = "None"
+  bestAttribute = None
   bestGain = 0
   #Loop through all attributes and check the entropy gained from the split
   #New entropy will be a weighted average on the entropy
@@ -77,6 +84,42 @@ def findBestAttribute(examples):
       bestGain = entGained 
   return bestAttribute
 
+
+def ID3(examples, default):
+  '''
+  Takes in an array of examples, and returns a tree (an instance of Node) 
+  trained on the examples.  Each example is a dictionary of attribute:value pairs,
+  and the target class variable is a special attribute with the name "Class".
+  Any missing attributes are denoted with a value of "?"
+  '''
+  best = findBestAttribute(examples)
+  t = Node
+
+  if len(examples) == 0:
+    return default
+  elif sameClass(examples) or best == None:
+    return default
+
+  else:
+    #Find different values in for attribute best
+    values = list(set(list([example[best] for example in examples])))
+    #Define Node Stuff
+    t.label = best
+    t.default = mode(examples,best)
+    t.entrop = entropy(examples, best)
+
+    for value in values:
+      #split examples for the different values of best
+      newExamples = [example for example in examples if example[best] == value]
+      subtree = ID3(newExamples,mode(newExamples, 'Class'))
+      #t.children.append(subtree)
+      t.parentchar.append(value)
+    return t
+
+
+#Returns the mode classification from the examples
+
+
 def prune(node, examples):
   '''
   Takes in a trained tree and a validation set of examples.  Prunes nodes in order
@@ -96,44 +139,5 @@ def evaluate(node, example):
   assigns to the example.
   '''
 
-def entropy(ds, att):
-  '''
-  Calculates the entropy for an array of examples, ds, in dictionary form with the
-  defining attribute, att. att is a string. 
 
-  Values unknown, denoted at "?" are tallied and the entropy calculation 
-  removes data points with "?" from the set (e.g. total = 5, two ?'s causes total = 3)
 
-  '''
-  #List of all possible characteristics
-  labels = list(set(list([example['Class'] for example in ds])))
-  #Counts of each type of characteristic
-  num = len(labels)
-  counts = [0]*num
-  #Count number of known attributes, and number of each characteristic
-  total = 0;
-  for ex in ds:
-    if ex[att] != '?':
-      total += 1
-      for label in labels:
-        if ex['Class'] == label:
-        counts[labels.index(label)] +=1
-
- 
-  #Calculate entropy and returns
-  ent = 0
-  for i in range(0,num):
-    p = float(counts[1])/float(total)
-    ent += - p*math.log(p,num)
-  return ent
-
-def infoGain(ds):
-  '''
-  Takes in an array of values, and calculates the information gain for each possible split 
-  returns the highest valued first. 
-  ''' 
-
-def dicParse(data):
-  '''
-  Reads in an array of dictionary values and does shit to them. Working on this...
-  '''
