@@ -98,7 +98,7 @@ def ID3(examples, default):
   if len(examples) == 0:
     return default
   elif sameClass(examples) or best == None:
-    return default
+    return mode(examples, 'Class')
 
   else:
     #Find different values in for attribute best
@@ -114,11 +114,10 @@ def ID3(examples, default):
       subtree = ID3(newExamples,mode(newExamples, 'Class'))
       t.children.append(subtree)
       t.parentchar.append(value)
+      #if the subtree equals default, end of tree!
+      if subtree == mode(newExamples, 'Class'):
+        t.isEnd = True
     return t
-
-
-#Returns the mode classification from the examples
-
 
 def prune(node, examples):
   '''
@@ -132,12 +131,22 @@ def test(node, examples):
   of examples the tree classifies correctly).
   '''
 
-
-def evaluate(node, example):
+def evaluate(intree, example):
   '''
   Takes in a tree and one example.  Returns the Class value that the tree
-  assigns to the example.
+  assigned to the example.
   '''
+  #Case if the node is not a node, but an end point
+  if not isinstance(intree,Node):
+    return intree
 
+  lab = intree.label
+  att = example[lab]
+  idx = intree.parentchar.index(att)
+  next_node = intree.children[idx]
+  if intree.isEnd:
+    return next_node
+  else:
+    return evaluate(next_node,example)
 
 
