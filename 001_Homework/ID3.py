@@ -23,13 +23,17 @@ def entropy(ds, att):
       for label in labels:
         if ex['Class'] == label:
           counts[labels.index(label)] +=1
-
+  #In the zero case, so question marks for everything, I think we should return ent = 1, or most uncertainty
+  #since ?'s are extremely uncertain 
+  if total == 0:
+    return 1 
  
   #Calculate entropy and returns
   ent = 0
   for i in range(0,num-1):
     p = float(counts[1])/float(total)
-    ent += - p*math.log(p,num)
+    #Log Base 2, not base num - his notes weren't clear!
+    ent += - p*math.log(p,2)
   return ent
 
 def mode(examples, att):
