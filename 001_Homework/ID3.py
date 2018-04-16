@@ -32,7 +32,6 @@ def entropy(ds, att):
   ent = 0
   for i in range(0,num-1):
     p = float(counts[1])/float(total)
-    #Log Base 2, not base num - his notes weren't clear!
     ent += - p*math.log(p,2)
   return ent
 
@@ -87,7 +86,6 @@ def findBestAttribute(examples):
       bestAttribute = attribute
       bestGain = entGained 
   return bestAttribute
-
 
 def ID3(examples, default):
   '''
