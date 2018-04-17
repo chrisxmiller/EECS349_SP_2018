@@ -106,13 +106,9 @@ def ID3(examples, default):
   t = Node()
 
   if len(examples) == 0:
-    t.isEnd = True
-    t.children.append(default)
     return default
   elif sameClass(examples) or best == None:
-    t.isEnd = True
-    t.children.append(mode(examples, 'Class'))
-    return t
+    return mode(examples, 'Class')
 
   else:
     #Find different values in for attribute best
@@ -160,12 +156,7 @@ def evaluate(intree, example):
   Takes in a tree and one example.  Returns the Class value that the tree
   assigned to the example.
   '''
-  #Case if the node is not a node, but an end point
   if not isinstance(intree,Node):
-    return intree
-
-  
-  if intree.isEnd:
     return intree
   else:
     lab = intree.label

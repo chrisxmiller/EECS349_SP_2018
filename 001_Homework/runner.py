@@ -48,7 +48,7 @@ data = [dict(a=1, b=0,  c='?', Class=1),
 
 tree = ID3.ID3(trainingData,0)
 
-print tree.children[0]
-print trainingData[73]
+#print tree.children[0]
+print trainingData[169]['Class']
 
-print ID3.evaluate(tree,trainingData[73]).children
+print ID3.evaluate(tree,trainingData[169])
