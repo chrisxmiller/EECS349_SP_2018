@@ -29,10 +29,15 @@ def entropy(ds, att):
     return 1 
  
   #Calculate entropy and returns
+  #Citation for log base 2: https://fr-s-schneider.ncifcrf.gov/paper/primer/primer.pdf
+
   ent = 0
   for i in range(0,num-1):
-    p = float(counts[1])/float(total)
-    ent += - p*math.log(p,2)
+    p = float(counts[i])/float(total)
+    if p == 0:
+      ent += 0
+    else:
+     ent += - p*math.log(p,2)
   return ent
 
 def mode(examples, att):
@@ -85,6 +90,9 @@ def findBestAttribute(examples):
     if entGained > bestGain:
       bestAttribute = attribute
       bestGain = entGained 
+  if bestGain < 0.0000000000000005:
+    return None
+
   return bestAttribute
 
 def ID3(examples, default):
@@ -98,13 +106,20 @@ def ID3(examples, default):
   t = Node()
 
   if len(examples) == 0:
+    t.isEnd = True
+    t.children.append(default)
     return default
   elif sameClass(examples) or best == None:
-    return mode(examples, 'Class')
+    t.isEnd = True
+    t.children.append(mode(examples, 'Class'))
+    return t
 
   else:
     #Find different values in for attribute best
     values = list(set(list([example[best] for example in examples])))
+
+    if '?' in values:
+      values.remove('?')
     #Define Node Stuff
     t.label = best
     t.default = mode(examples,best)
@@ -117,8 +132,6 @@ def ID3(examples, default):
       t.children.append(subtree)
       t.parentchar.append(value)
       #if the subtree equals default, end of tree!
-      if subtree == mode(newExamples, 'Class'):
-        t.isEnd = True
     return t
 
 def prune(node, examples):
@@ -132,6 +145,15 @@ def test(node, examples):
   Takes in a trained tree and a test set of examples.  Returns the accuracy (fraction
   of examples the tree classifies correctly).
   '''
+  total = 0
+  correct = 0
+
+  for example in examples:
+    total += 1
+    out = evaluate(node, example)
+    if out == exmaple['Class']:
+      correct += 1
+
 
 def evaluate(intree, example):
   '''
@@ -142,13 +164,14 @@ def evaluate(intree, example):
   if not isinstance(intree,Node):
     return intree
 
-  lab = intree.label
-  att = example[lab]
-  idx = intree.parentchar.index(att)
-  next_node = intree.children[idx]
+  
   if intree.isEnd:
-    return next_node
+    return intree
   else:
+    lab = intree.label
+    att = example[lab]
+    idx = intree.parentchar.index(att)
+    next_node = intree.children[idx]
     return evaluate(next_node,example)
 
 
