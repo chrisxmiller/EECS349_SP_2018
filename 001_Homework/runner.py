@@ -3,6 +3,7 @@ from parse import parse
 import ID3
 import sys
 from node import Node
+import random
 
 
 
@@ -44,11 +45,18 @@ data = [dict(a=1, b=0,  c='?', Class=1),
         dict(a=3, b=0,  c=1,   Class=3), 
         dict(a=3, b=2,  c='?', Class=3)]
 
-
-
 tree = ID3.ID3(trainingData,0)
 
 #print tree.children[0]
 print trainingData[169]['Class']
 
 print ID3.evaluate(tree,trainingData[169])
+percent = .70
+randIndices = random.sample(range(len(trainingData)),int(percent*len(trainingData)))
+training = [trainingData[i] for i in randIndices]
+testing = [trainingData[i] for i in range(len(trainingData)) if i not in randIndices]
+print len(testing)
+print len(training)
+
+print ID3.test(ID3.ID3(training,0),testing)
+

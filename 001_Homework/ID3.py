@@ -141,14 +141,15 @@ def test(node, examples):
   Takes in a trained tree and a test set of examples.  Returns the accuracy (fraction
   of examples the tree classifies correctly).
   '''
-  total = 0
-  correct = 0
+  total = 0.0
+  correct = 0.0
 
   for example in examples:
     total += 1
     out = evaluate(node, example)
-    if out == exmaple['Class']:
+    if out == example['Class']:
       correct += 1
+  return correct/total
 
 
 def evaluate(intree, example):
@@ -161,6 +162,8 @@ def evaluate(intree, example):
   else:
     lab = intree.label
     att = example[lab]
+    if att == '?':
+      att = intree.default
     idx = intree.parentchar.index(att)
     next_node = intree.children[idx]
     return evaluate(next_node,example)
