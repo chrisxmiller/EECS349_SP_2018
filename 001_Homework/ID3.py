@@ -90,7 +90,7 @@ def findBestAttribute(examples):
     if entGained > bestGain:
       bestAttribute = attribute
       bestGain = entGained 
-  if bestGain < 0.0000000000000005:
+  if bestGain < 0.00001:
     return None
 
   return bestAttribute

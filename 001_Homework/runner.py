@@ -16,16 +16,16 @@ import random
 trainingData = parse('house_votes_84.data')
 
 #Read in the data
-data2 = [dict(a=1, b=1, Class='a'),
-		dict(a=1, b=1, Class='b'),
-	    dict(a=1, b=0, Class='b'),	
-	    dict(a=1, b=0, Class='b'),
-    	dict(a=1, b=0, Class='b'),
-    	dict(a=0, b=1, Class='b'), 
-		dict(a=0, b=1, Class='a'),
-	    dict(a=0, b=1, Class='a'), 	
-	    dict(a=0, b=0, Class='a'),
-    	dict(a=0, b=0, Class='a')]
+data2 = [dict(a=1, b=1, Class='r'),
+		dict(a=1, b=1, Class='d'),
+	    dict(a=1, b=0, Class='d'),	
+	    dict(a=1, b=0, Class='d'),
+    	dict(a=1, b=0, Class='d'),
+    	dict(a=0, b=1, Class='d'), 
+		dict(a=0, b=1, Class='r'),
+	    dict(a=0, b=1, Class='r'), 	
+	    dict(a=0, b=0, Class='r'),
+    	dict(a=0, b=0, Class='r')]
 
 
 data4 =  [dict(a=1, b=0,   c='?', Class='a'), 
@@ -45,18 +45,60 @@ data = [dict(a=1, b=0,  c='?', Class=1),
         dict(a=3, b=0,  c=1,   Class=3), 
         dict(a=3, b=2,  c='?', Class=3)]
 
-tree = ID3.ID3(trainingData,0)
+tree = ID3.ID3(trainingData,'r')
 
-#print tree.children[0]
-print trainingData[169]['Class']
+def count(tree,n):
+	if isEnd(tree):
+		return 1
+	else:
+		for child in tree.children:
+			if isinstance(child,Node):
+				n += count(child,n)
+	return n
 
-print ID3.evaluate(tree,trainingData[169])
+
+
+
+def isEnd(tree):
+	for child in tree.children:
+		if isinstance(child,Node):
+			return False
+	return True
+
+def prime_factors(n):
+	for i in range(2,n):
+		if n % i == 0:
+			return [i] + prime_factors(n/i)
+	return [n]
+
+
+def findEnd(tree,path=[]):
+	paths =[]
+	if isEnd(tree):
+		return [path]
+	for child in tree.children:
+		if isinstance(child,Node):
+			print tree.children.index(child)
+			newPath = path
+			newPath = newPath + [tree.children.index(child)]
+			paths.extend(findEnd(child,newPath))
+	return paths
+
+
+print findEnd(tree)
+print tree.children[0].children[1].children[0].children[1].children
+print tree.children[1].children[1].children[1].children[1].children[0].children[0].children
+
+
+
+
+#print ID3.evaluate(tree,trainingData[169])
 percent = .70
 randIndices = random.sample(range(len(trainingData)),int(percent*len(trainingData)))
 training = [trainingData[i] for i in randIndices]
 testing = [trainingData[i] for i in range(len(trainingData)) if i not in randIndices]
-print len(testing)
-print len(training)
+#print len(testing)
+#print len(training)
 
-print ID3.test(ID3.ID3(training,0),testing)
+#print ID3.test(ID3.ID3(training,0),testing)
 
