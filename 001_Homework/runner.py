@@ -84,34 +84,50 @@ def findEnd(tree,path=[]):
 	return paths
 
 
-paths = findEnd(tree)
-print tree.children[0].children[1].children[0].children
+#paths = findEnd(tree)
+#print tree.children[0].children[1].children[0].children
 #print tree.children[1].children[1].children[1].children[1].children[0].children[0].children
 
-def followPath(tree,path,n=0):
+def prunePath(tree,path,n=0):
 	newTree = tree
 	if n < len(path):
 		branch = tree.children[path[n]]
-		newTree.children[path[n]] = followPath(branch,path,n+1)
+		newTree.children[path[n]] = prunePath(branch,path,n+1)
 	else:
 		df = tree.default
 		ind = tree.parentchar.index(df)
 		mode = tree.children[ind]
-		print mode
 		return mode
 	return newTree
 
-newTree =  followPath(tree,paths[0])
-print newTree.children[0].children[1].children[0].children
+def _prune(tree,ex):
+	bestTree = tree
+	oldAcc = ID3.test(tree,ex)
+	bestAcc = ID3.test(tree,ex)
+	paths = findEnd(tree)
+	change = False
+	for path in paths:
+		newTree = prunePath(tree,path)
+		newAcc = ID3.test(newTree,ex)
+		if newAcc - bestAcc > 0:
+			bestAcc = newAcc
+			bestTree = newTree
+			change = True
+	if change:
+		bestTree = _prune(bestTree,ex)
+	return bestTree
 
 
 #print ID3.evaluate(tree,trainingData[169])
-percent = .70
+percent = .60
 randIndices = random.sample(range(len(trainingData)),int(percent*len(trainingData)))
 training = [trainingData[i] for i in randIndices]
 testing = [trainingData[i] for i in range(len(trainingData)) if i not in randIndices]
 #print len(testing)
 #print len(training)
-
 #print ID3.test(ID3.ID3(training,0),testing)
 
+tree = ID3.ID3(training,'y')
+print ID3.test(tree,testing)
+newTree = _prune(tree,testing)
+print ID3.test(newTree,testing)
