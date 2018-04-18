@@ -78,18 +78,31 @@ def findEnd(tree,path=[]):
 		return [path]
 	for child in tree.children:
 		if isinstance(child,Node):
-			print tree.children.index(child)
 			newPath = path
 			newPath = newPath + [tree.children.index(child)]
 			paths.extend(findEnd(child,newPath))
 	return paths
 
 
-print findEnd(tree)
-print tree.children[0].children[1].children[0].children[1].children
-print tree.children[1].children[1].children[1].children[1].children[0].children[0].children
+paths = findEnd(tree)
+print tree.children[0].children[1].children[0].children
+#print tree.children[1].children[1].children[1].children[1].children[0].children[0].children
 
+def followPath(tree,path,n=0):
+	newTree = tree
+	if n < len(path):
+		branch = tree.children[path[n]]
+		newTree.children[path[n]] = followPath(branch,path,n+1)
+	else:
+		df = tree.default
+		ind = tree.parentchar.index(df)
+		mode = tree.children[ind]
+		print mode
+		return mode
+	return newTree
 
+newTree =  followPath(tree,paths[0])
+print newTree.children[0].children[1].children[0].children
 
 
 #print ID3.evaluate(tree,trainingData[169])
