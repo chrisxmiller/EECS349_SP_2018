@@ -75,6 +75,8 @@ def prime_factors(n):
 
 def findEnd(tree,path=[]):
 	paths =[]
+	if isinstance(tree,str):
+		return paths
 	if isEnd(tree):
 		return [path]
 	for child in tree.children:
@@ -119,40 +121,39 @@ def _prune(tree,ex):
 	return bestTree
 
 def charts(data):
-
-	sizes = range(10,301)
+	sizes = [10,50,100,150,200,250,300]
 	results = len(sizes)*[None]
-	accuracies = results
-	accuraciesP = results
+	accuracies = len(sizes)*[None]
+	accuraciesP = len(sizes)*[None]
 	for sampleSize in sizes:
 		acc = 0.0
 		accP = 0.0
-		for test in range(0,100):
+		for tests in range(0,100):
 			randIndices = random.sample(range(len(data)),sampleSize)
 			trainVal = [data[i] for i in randIndices]
 			testing = [data[i] for i in range(len(data)) if i not in randIndices]
-			pTrain = .9
+			pTrain = .90
 			randIndices = random.sample(range(len(trainVal)),int(pTrain*len(trainVal)))
 			train = [trainVal[i] for i in randIndices]
 			val = [trainVal[i] for i in range(len(trainVal)) if i not in randIndices]
 			tree = ID3.ID3(train)
-			treePrune = _prune(copy.deepcopy(tree),val)
+			treePrune = _prune(tree,val)
 			acc += ID3.test(tree,testing)
 			accP += ID3.test(treePrune,testing)
-		accuracies[sampleSize-10] = acc / 100.0
-		accuraciesP[sampleSize-10] = accP / 100.0
+		accuracies[sizes.index(sampleSize)] = acc / 100.0
+		accuraciesP[sizes.index(sampleSize)] = accP / 100.0
 	results = [sizes,accuracies,accuraciesP]
 	return results
 
-#print charts(trainingData)
+print charts(trainingData)
 
 #print ID3.evaluate(tree,trainingData[169])
-pTrainVal = .7
-randIndices = random.sample(range(len(trainingData)),int(pTrainVal*len(trainingData)))
+sampleSize = 10
+randIndices = random.sample(range(len(trainingData)),sampleSize)
 trainVal = [trainingData[i] for i in randIndices]
 testing = [trainingData[i] for i in range(len(trainingData)) if i not in randIndices]
 pTrain = .90
-randIndices = random.sample(range(len(trainVal)),int(pTrainVal*len(trainVal)))
+randIndices = random.sample(range(len(trainVal)),int(pTrain*len(trainVal)))
 train = [trainVal[i] for i in randIndices]
 val = [trainVal[i] for i in range(len(trainVal)) if i not in randIndices]
 
@@ -161,8 +162,7 @@ val = [trainVal[i] for i in range(len(trainVal)) if i not in randIndices]
 #print ID3.test(ID3.ID3(training,0),testing)
 
 tree = ID3.ID3(train,'y')
-t =copy.deepcopy(tree)
-print ID3.test(t,val)
 newTree = _prune(tree,val)
 
-print ID3.test(newTree,val)
+print ID3.test(tree,testing)
+print ID3.test(newTree,testing)
