@@ -100,34 +100,43 @@ def prunePath(tree,path,n=0):
 		return mode
 	return newTree
 
-def _prune(tree,ex):
+
+def _prune(tree,ex,n):
 	bestTree = tree
-	oldAcc = ID3.test(tree,ex)
 	bestAcc = ID3.test(tree,ex)
 	paths = findEnd(tree)
 	change = False
 	for path in paths:
 		newTree = prunePath(tree,path)
 		newAcc = ID3.test(newTree,ex)
-		if newAcc - bestAcc > 0:
+		if newAcc - bestAcc > 0.001:
 			bestAcc = newAcc
 			bestTree = newTree
 			change = True
+			n +=1
 	if change:
-		bestTree = _prune(bestTree,ex)
+		bestTree = _prune(bestTree,ex,n)
+	print n
 	return bestTree
 
 
+
 #print ID3.evaluate(tree,trainingData[169])
-percent = .60
-randIndices = random.sample(range(len(trainingData)),int(percent*len(trainingData)))
-training = [trainingData[i] for i in randIndices]
+pTrainVal = .70
+randIndices = random.sample(range(len(trainingData)),int(pTrainVal*len(trainingData)))
+trainVal = [trainingData[i] for i in randIndices]
 testing = [trainingData[i] for i in range(len(trainingData)) if i not in randIndices]
+pTrain = .90
+randIndices = random.sample(range(len(trainVal)),int(pTrainVal*len(trainVal)))
+train = [trainVal[i] for i in randIndices]
+val = [trainVal[i] for i in range(len(trainVal)) if i not in randIndices]
+
 #print len(testing)
 #print len(training)
 #print ID3.test(ID3.ID3(training,0),testing)
 
-tree = ID3.ID3(training,'y')
+tree = ID3.ID3(train,'y')
 print ID3.test(tree,testing)
-newTree = _prune(tree,testing)
+newTree = _prune(tree,val,0)
+
 print ID3.test(newTree,testing)
