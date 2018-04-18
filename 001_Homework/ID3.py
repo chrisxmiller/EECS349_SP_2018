@@ -90,12 +90,12 @@ def findBestAttribute(examples):
     if entGained > bestGain:
       bestAttribute = attribute
       bestGain = entGained 
-  if bestGain < 0.00001:
+  if bestGain < 0.00000001:
     return None
 
   return bestAttribute
 
-def ID3(examples, default):
+def ID3(examples, default='y'):
   '''
   Takes in an array of examples, and returns a tree (an instance of Node) 
   trained on the examples.  Each example is a dictionary of attribute:value pairs,
@@ -145,10 +145,10 @@ def test(node, examples):
   correct = 0.0
 
   for example in examples:
-    total += 1
+    total += 1.0
     out = evaluate(node, example)
     if out == example['Class']:
-      correct += 1
+      correct += 1.0
   return correct/total
 
 

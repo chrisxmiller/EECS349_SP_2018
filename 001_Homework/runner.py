@@ -4,6 +4,7 @@ import ID3
 import sys
 from node import Node
 import random
+import copy
 
 
 
@@ -101,28 +102,52 @@ def prunePath(tree,path,n=0):
 	return newTree
 
 
-def _prune(tree,ex,n):
-	bestTree = tree
+def _prune(tree,ex):
+	bestTree = copy.deepcopy(tree)
 	bestAcc = ID3.test(tree,ex)
 	paths = findEnd(tree)
 	change = False
 	for path in paths:
-		newTree = prunePath(tree,path)
+		newTree = prunePath(copy.deepcopy(tree),path)
 		newAcc = ID3.test(newTree,ex)
-		if newAcc - bestAcc > 0.001:
+		if (newAcc - bestAcc) > 0.001:
 			bestAcc = newAcc
-			bestTree = newTree
+			bestTree = copy.deepcopy(newTree)
 			change = True
-			n +=1
 	if change:
-		bestTree = _prune(bestTree,ex,n)
-	print n
+		bestTree = _prune(bestTree,ex)
 	return bestTree
 
+def charts(data):
 
+	sizes = range(10,301)
+	results = len(sizes)*[None]
+	accuracies = results
+	accuraciesP = results
+	for sampleSize in sizes:
+		acc = 0.0
+		accP = 0.0
+		for test in range(0,100):
+			randIndices = random.sample(range(len(data)),sampleSize)
+			trainVal = [data[i] for i in randIndices]
+			testing = [data[i] for i in range(len(data)) if i not in randIndices]
+			pTrain = .9
+			randIndices = random.sample(range(len(trainVal)),int(pTrain*len(trainVal)))
+			train = [trainVal[i] for i in randIndices]
+			val = [trainVal[i] for i in range(len(trainVal)) if i not in randIndices]
+			tree = ID3.ID3(train)
+			treePrune = _prune(copy.deepcopy(tree),val)
+			acc += ID3.test(tree,testing)
+			accP += ID3.test(treePrune,testing)
+		accuracies[sampleSize-10] = acc / 100.0
+		accuraciesP[sampleSize-10] = accP / 100.0
+	results = [sizes,accuracies,accuraciesP]
+	return results
+
+#print charts(trainingData)
 
 #print ID3.evaluate(tree,trainingData[169])
-pTrainVal = .70
+pTrainVal = .7
 randIndices = random.sample(range(len(trainingData)),int(pTrainVal*len(trainingData)))
 trainVal = [trainingData[i] for i in randIndices]
 testing = [trainingData[i] for i in range(len(trainingData)) if i not in randIndices]
@@ -136,7 +161,8 @@ val = [trainVal[i] for i in range(len(trainVal)) if i not in randIndices]
 #print ID3.test(ID3.ID3(training,0),testing)
 
 tree = ID3.ID3(train,'y')
-print ID3.test(tree,testing)
-newTree = _prune(tree,val,0)
+t =copy.deepcopy(tree)
+print ID3.test(t,val)
+newTree = _prune(tree,val)
 
-print ID3.test(newTree,testing)
+print ID3.test(newTree,val)
