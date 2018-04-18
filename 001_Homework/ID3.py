@@ -1,5 +1,6 @@
 from node import Node
 import math
+import copy
 
 def entropy(ds, att):
   '''
@@ -130,11 +131,49 @@ def ID3(examples, default='y'):
       #if the subtree equals default, end of tree!
     return t
 
-def prune(node, examples):
-  '''
-  Takes in a trained tree and a validation set of examples.  Prunes nodes in order
-  to improve accuracy on the validation data; the precise pruning strategy is up to you.
-  '''
+def isEnd(tree):
+  for child in tree.children:
+    if isinstance(child,Node):
+      return False
+  return True
+
+def prime_factors(n):
+  for i in range(2,n):
+    if n % i == 0:
+      return [i] + prime_factors(n/i)
+  return [n]
+
+
+def findEnd(tree,path=[]):
+  paths =[]
+  if isinstance(tree,str):
+    return paths
+  if isEnd(tree):
+    return [path]
+  for child in tree.children:
+    if isinstance(child,Node):
+      newPath = path
+      newPath = newPath + [tree.children.index(child)]
+      paths.extend(findEnd(child,newPath))
+  return paths
+
+
+#paths = findEnd(tree)
+#print tree.children[0].children[1].children[0].children
+#print tree.children[1].children[1].children[1].children[1].children[0].children[0].children
+
+def prunePath(tree,path,n=0):
+  newTree = tree
+  if n < len(path):
+    branch = tree.children[path[n]]
+    newTree.children[path[n]] = prunePath(branch,path,n+1)
+  else:
+    df = tree.default
+    ind = tree.parentchar.index(df)
+    mode = tree.children[ind]
+    return mode
+  return newTree
+
 
 def test(node, examples):
   '''
@@ -169,3 +208,18 @@ def evaluate(intree, example):
     return evaluate(next_node,example)
 
 
+def prune(tree,ex):
+  bestTree = copy.deepcopy(tree)
+  bestAcc = test(tree,ex)
+  paths = findEnd(tree)
+  change = False
+  for path in paths:
+    newTree = prunePath(copy.deepcopy(tree),path)
+    newAcc = test(newTree,ex)
+    if (newAcc - bestAcc) > 0.001:
+      bestAcc = newAcc
+      bestTree = copy.deepcopy(newTree)
+      change = True
+  if change:
+    bestTree = prune(bestTree,ex)
+  return bestTree

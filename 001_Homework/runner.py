@@ -104,7 +104,7 @@ def prunePath(tree,path,n=0):
 	return newTree
 
 
-def _prune(tree,ex):
+def prune(tree,ex):
 	bestTree = copy.deepcopy(tree)
 	bestAcc = ID3.test(tree,ex)
 	paths = findEnd(tree)
@@ -117,7 +117,7 @@ def _prune(tree,ex):
 			bestTree = copy.deepcopy(newTree)
 			change = True
 	if change:
-		bestTree = _prune(bestTree,ex)
+		bestTree = prune(bestTree,ex)
 	return bestTree
 
 def charts(data):
@@ -137,7 +137,7 @@ def charts(data):
 			train = [trainVal[i] for i in randIndices]
 			val = [trainVal[i] for i in range(len(trainVal)) if i not in randIndices]
 			tree = ID3.ID3(train)
-			treePrune = _prune(tree,val)
+			treePrune = prune(tree,val)
 			acc += ID3.test(tree,testing)
 			accP += ID3.test(treePrune,testing)
 		accuracies[sizes.index(sampleSize)] = acc / 100.0
@@ -162,7 +162,7 @@ val = [trainVal[i] for i in range(len(trainVal)) if i not in randIndices]
 #print ID3.test(ID3.ID3(training,0),testing)
 
 tree = ID3.ID3(train,'y')
-newTree = _prune(tree,val)
+newTree = prune(tree,val)
 
 print ID3.test(tree,testing)
 print ID3.test(newTree,testing)
