@@ -5,6 +5,9 @@ import sys
 from node import Node
 import random
 import copy
+import numpy as np
+
+import matplotlib.pyplot as plt
 
 
 
@@ -14,150 +17,65 @@ import copy
 #EECS 349
 
 #Parse the voting training data
-trainingData = parse('house_votes_84.data')
+data = parse('house_votes_84.data')
+#populate sizes
+sizes = range(10,300,5)
 
-#Read in the data
-data2 = [dict(a=1, b=1, Class='r'),
-		dict(a=1, b=1, Class='d'),
-	    dict(a=1, b=0, Class='d'),	
-	    dict(a=1, b=0, Class='d'),
-    	dict(a=1, b=0, Class='d'),
-    	dict(a=0, b=1, Class='d'), 
-		dict(a=0, b=1, Class='r'),
-	    dict(a=0, b=1, Class='r'), 	
-	    dict(a=0, b=0, Class='r'),
-    	dict(a=0, b=0, Class='r')]
+withPruning = []
+withoutPruning = []
 
+withPruningV = []
+withoutPruningV = []
 
-data4 =  [dict(a=1, b=0,   c='?', Class='a'), 
-		 dict(a=1, b=3,   c=2,   Class=1),
-		 dict(a=2, b='?', c=1,   Class=2), 
-		 dict(a=2, b=1,   c=3,   Class=3),
-         dict(a=3, b=0,   c=1,   Class=3), 
-         dict(a=3, b=2,   c='?', Class=3)]
+#---- Means ----
+withPruningMean =[]
+withoutPruningMean = []
 
-data3 = [dict(a=1, b=0, Class=1), dict(a=1, b=1, Class=1)]
+withPruningVMean = []
+withoutPruningVMean = []
 
+for size in sizes:
+	for i in range(100):
+		random.shuffle(data)
+		train = data[:size]
+		valid = data[300:335]
+		test = data[335:]
+		tree = ID3.ID3(train, 'democrat')
+		acc = ID3.test(tree, valid)
+    	withoutPruningV.append(acc)
+    	acc = ID3.test(tree, test)
+    	withoutPruning.append(acc)
+  
+    	ID3.prune(tree, valid)
+    	acc = ID3.test(tree, valid)
+    	withPruningV.append(acc)
+    	acc = ID3.test(tree, test)
+    	withPruning.append(acc)
 
-data = [dict(a=1, b=0,  c='?', Class=1), 
-		dict(a=1, b=3,  c=2,   Class=1),
-        dict(a=2, b='?',c=1,   Class=2), 
-        dict(a=2, b=1,  c=3,   Class=2),
-        dict(a=3, b=0,  c=1,   Class=3), 
-        dict(a=3, b=2,  c='?', Class=3)]
+	withPruningMean.append(np.mean(withPruning))
+	withoutPruningMean.append(np.mean(withoutPruning))
 
-tree = ID3.ID3(trainingData,'r')
+	withPruningVMean.append(np.mean(withPruningV))
+	withoutPruningVMean.append(np.mean(withoutPruningV))
 
-def count(tree,n):
-	if isEnd(tree):
-		return 1
-	else:
-		for child in tree.children:
-			if isinstance(child,Node):
-				n += count(child,n)
-	return n
+	withPruning = []
+	withoutPruning = []
+	withPruningV = []
+	withoutPruningV = []
 
+plt.figure(1)
+plt.plot(sizes, withoutPruningMean, 'r', sizes, withPruningMean, 'b')
+plt.xlabel('Number of Training Points')
+plt.ylabel('Accuracy')
+plt.title('Mean Accuracy (100 runs) vs. Number of Training Points on Test Data')
+plt.show()
 
-
-
-def isEnd(tree):
-	for child in tree.children:
-		if isinstance(child,Node):
-			return False
-	return True
-
-def prime_factors(n):
-	for i in range(2,n):
-		if n % i == 0:
-			return [i] + prime_factors(n/i)
-	return [n]
-
-
-def findEnd(tree,path=[]):
-	paths =[]
-	if isinstance(tree,str):
-		return paths
-	if isEnd(tree):
-		return [path]
-	for child in tree.children:
-		if isinstance(child,Node):
-			newPath = path
-			newPath = newPath + [tree.children.index(child)]
-			paths.extend(findEnd(child,newPath))
-	return paths
+plt.figure(2)
+plt.plot(sizes, withoutPruningVMean, 'r', sizes, withPruningVMean, 'b')
+plt.xlabel('Number of Training Points')
+plt.ylabel('Accuracy')
+plt.title('Mean Accuracy (100 runs) vs. Number of Training Points on Validation Data')
+plt.show()
 
 
-#paths = findEnd(tree)
-#print tree.children[0].children[1].children[0].children
-#print tree.children[1].children[1].children[1].children[1].children[0].children[0].children
 
-def prunePath(tree,path,n=0):
-	newTree = tree
-	if n < len(path):
-		branch = tree.children[path[n]]
-		newTree.children[path[n]] = prunePath(branch,path,n+1)
-	else:
-		df = tree.default
-		ind = tree.parentchar.index(df)
-		mode = tree.children[ind]
-		return mode
-	return newTree
-
-
-def prune(tree,ex):
-	bestTree = tree
-	bestAcc = ID3.test(tree,ex)
-	paths = findEnd(tree)
-	change = False
-	for path in paths:
-		newTree = prunePath(copy.deepcopy(tree),path)
-		newAcc = ID3.test(newTree,ex)
-		if (newAcc - bestAcc) > 0.001:
-			bestAcc = newAcc
-			prunePath(bestTree,path)
-			change = True
-	if change:
-		bestTree = prune(bestTree,ex)
-	return bestTree
-
-def charts(data):
-	sizes = [10,50,100,150,200,250,300]
-	results = len(sizes)*[None]
-	accuracies = len(sizes)*[None]
-	accuraciesP = len(sizes)*[None]
-	for sampleSize in sizes:
-		acc = 0.0
-		accP = 0.0
-		for tests in range(0,100):
-			randIndices = random.sample(range(len(data)),sampleSize)
-			trainVal = [data[i] for i in randIndices]
-			testing = [data[i] for i in range(len(data)) if i not in randIndices]
-			pTrain = .90
-			randIndices = random.sample(range(len(trainVal)),int(pTrain*len(trainVal)))
-			train = [trainVal[i] for i in randIndices]
-			val = [trainVal[i] for i in range(len(trainVal)) if i not in randIndices]
-			tree = ID3.ID3(train)
-			treePrune = prune(tree,val)
-			acc += ID3.test(tree,testing)
-			accP += ID3.test(treePrune,testing)
-		accuracies[sizes.index(sampleSize)] = acc / 100.0
-		accuraciesP[sizes.index(sampleSize)] = accP / 100.0
-	results = [sizes,accuracies,accuraciesP]
-	return results
-
-#print charts(trainingData)
-
-random.shuffle(trainingData)
-train = trainingData[:len(trainingData)/2]
-val = trainingData[len(trainingData)/2:3*len(trainingData)/4]
-testing = trainingData[3*len(trainingData)/4:]
-
-#print len(testing)
-#print len(training)
-#print ID3.test(ID3.ID3(training,0),testing)
-
-tree = ID3.ID3(train,'y')
-newTree = prune(tree,val)
-
-print ID3.test(tree,testing)
-print ID3.test(newTree,testing)

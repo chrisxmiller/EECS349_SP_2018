@@ -63,7 +63,7 @@ def testPruningOnHouseData(inFile):
   withPruning = []
   withoutPruning = []
   data = parse.parse(inFile)
-  for i in range(1000):
+  for i in range(10):
     random.shuffle(data)
     train = data[:len(data)/2]
     valid = data[len(data)/2:3*len(data)/4]
@@ -93,6 +93,6 @@ def testPruningOnHouseData(inFile):
   print withoutPruning
   print "average with pruning",sum(withPruning)/len(withPruning)," without: ",sum(withoutPruning)/len(withoutPruning)
   
-testPruning()
-# testPruningOnHouseData('house_votes_84.data')
+#testPruning()
+testPruningOnHouseData('house_votes_84.data')
 

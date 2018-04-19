@@ -96,7 +96,7 @@ def findBestAttribute(examples):
 
   return bestAttribute
 
-def ID3(examples, default='y'):
+def ID3(examples, default):
   '''
   Takes in an array of examples, and returns a tree (an instance of Node) 
   trained on the examples.  Each example is a dictionary of attribute:value pairs,
@@ -156,11 +156,6 @@ def findEnd(tree,path=[]):
       newPath = newPath + [tree.children.index(child)]
       paths.extend(findEnd(child,newPath))
   return paths
-
-
-#paths = findEnd(tree)
-#print tree.children[0].children[1].children[0].children
-#print tree.children[1].children[1].children[1].children[1].children[0].children[0].children
 
 def prunePath(tree,path,n=0):
   newTree = tree
