@@ -209,7 +209,7 @@ def evaluate(intree, example):
 
 
 def prune(tree,ex):
-  bestTree = copy.deepcopy(tree)
+  bestTree = tree
   bestAcc = test(tree,ex)
   paths = findEnd(tree)
   change = False
@@ -218,7 +218,7 @@ def prune(tree,ex):
     newAcc = test(newTree,ex)
     if (newAcc - bestAcc) > 0.001:
       bestAcc = newAcc
-      bestTree = copy.deepcopy(newTree)
+      prunePath(bestTree,path)
       change = True
   if change:
     bestTree = prune(bestTree,ex)
