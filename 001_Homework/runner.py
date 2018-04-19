@@ -38,6 +38,7 @@ withoutPruningVMean = []
 
 def chart(data):
 	sizes = [10,12,14,16,19,24,30,40,50,65,80,100,120,150,180,210,240,265,300]
+	#sizes = [50,65,80,100,120,150,180,210,240,265,300]
 	results = len(sizes)*[None]
 	accuracies = len(sizes)*[None]
 	accuraciesP = len(sizes)*[None]
@@ -45,6 +46,7 @@ def chart(data):
 		acc = 0.0
 		accP = 0.0
 		num = 100.0
+		count = 0.0
 		for tests in range(0,int(num)):
 			randIndices = random.sample(range(len(data)),sampleSize)
 			trainVal = [data[i] for i in randIndices]
@@ -55,14 +57,17 @@ def chart(data):
 			val = [trainVal[i] for i in range(len(trainVal)) if i not in randIndices]
 			tree = ID3.ID3(train,'y')
 			acc += ID3.test(tree,testing)
-			#ID3.prune(tree,val)
-			accP += ID3.test(tree,testing)
+			try:
+				newTree = ID3.prune(tree,val)
+				accP += ID3.test(tree,testing)
+			except RuntimeError:
+				count += 1.0
 		accuracies[sizes.index(sampleSize)] = acc / num
-		accuraciesP[sizes.index(sampleSize)] = accP / num
+		accuraciesP[sizes.index(sampleSize)] = accP / (num-count)
 	results = [sizes,accuracies,accuraciesP]
 	return results
 
-sampleSize = 300
+sampleSize = 5
 randIndices = random.sample(range(len(trainingData)),sampleSize)
 trainVal = [trainingData[i] for i in randIndices]
 testing = [trainingData[i] for i in range(len(trainingData)) if i not in randIndices]
@@ -73,9 +78,17 @@ val = [trainVal[i] for i in range(len(trainVal)) if i not in randIndices]
 
 tree = ID3.ID3(train,'y')
 print ID3.test(tree,testing)
-newTree = ID3.prune(tree,val)
+ID3.prune(tree,val)
+print ID3.test(tree,testing)
 
-print ID3.test(newTree,testing)
+
+results = chart(data)
+plt.figure(1)
+plt.plot(results[0], results[1], 'r', results[0], results[2], 'b')
+plt.xlabel('Number of Training Points')
+plt.ylabel('Accuracy')
+plt.title('Mean Accuracy (100 runs) vs. Number of Training Points on Test Data')
+plt.show()
 
 # for size in sizes:
 # 	for i in range(100):
@@ -105,13 +118,7 @@ print ID3.test(newTree,testing)
 # 	withoutPruning = []
 # 	withPruningV = []
 # 	withoutPruningV = []
-results = chart(data)
-plt.figure(1)
-plt.plot(results[0], results[1], 'r', results[0], results[2], 'b')
-plt.xlabel('Number of Training Points')
-plt.ylabel('Accuracy')
-plt.title('Mean Accuracy (100 runs) vs. Number of Training Points on Test Data')
-plt.show()
+
 
 # plt.figure(2)
 # plt.plot(sizes, withoutPruningVMean, 'r', sizes, withPruningVMean, 'b')
