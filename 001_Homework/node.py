@@ -5,5 +5,4 @@ class Node:
     self.entrop = 0
     self.default = None
     self.parentchar = []
-    self.isEnd = False 
     
